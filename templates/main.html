@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('title') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='class.css') }}">
+    <style>
+        body {
+            background-image: url("/static/1.jpg");
+            background-size: cover;        /* растянуть на весь блок */
+            background-position: center;   /* выровнять по центру */
+            background-repeat: no-repeat;  /* не повторять */
+            min-height: 100vh;  
+        }
+        .logout-link {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            margin-left: 1rem;
+        }
+        .logout-link:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="header部分 of header-title">{{ t('title') }}</h1>
+        <form method="POST" action="{{ url_for('change_language') }}" class="lang-form" aria-label="{{ t('select_language') }} form">
+            <select name="lang" class="lang-select" aria-label="{{ t('select_language') }}" onchange="this.form.submit()">
+                <option value="ru" {% if lang == 'ru' %}selected{% endif %}>🇷🇺 {{ t('russian') }}</option>
+                <option value="en" {% if lang == 'en' %}selected{% endif %}>🇺🇸 {{ t('english') }}</option>
+                <option value="uz" {% if lang == 'uz' %}selected{% endif %}>🇺🇿 {{ t('uzbek') }}</option>
+            </select>
+            {% if g.user %}
+                <a href="{{ url_for('logout') }}" class="logout-link">{{ t('logout') }}</a>
+            {% endif %}
+        </form>
+        <nav class="nav-center">
+            <a href="{{ url_for('index') }}">{{ t('home') }}</a>
+            {% if g.user %}
+                {% if g.user.is_staff %}
+                    <a href="{{ url_for('dashboard') }}">{{ t('dashboard') }}</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard') }}">{{ t('personal_account') }}</a>
+                    <a href="{{ url_for('payments') }}">{{ t('payments') }}</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('login') }}">{{ t('login') }}</a>
+                <a href="{{ url_for('register') }}">{{ t('register') }}</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer>
+        <p>© 2025 A utility payment platform created by student Artur </p>
+    </footer>
+</body>
+</html>
+
+<!-- created by artur -->

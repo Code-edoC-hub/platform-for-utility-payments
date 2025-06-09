@@ -1,0 +1,31 @@
+{% extends "main.html" %}
+{% block content %}
+    <h1>{{ t('waste_disposal') }}</h1>
+    <section aria-labelledby="receipts-title">
+        <h2 id="receipts-title">{{ t('last_paid_receipts') }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{{ t('receipt_number') }}</th>
+                    <th>{{ t('amount') }}</th>
+                    <th>{{ t('payment_date') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ receipt['receipt_number'] }}</td>
+                        <td>{{ "%.2f" | format(receipt['amount']) }}</td>
+                        <td>{{ receipt['payment_date'] }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" style="text-align:center;">{{ t('no_payments') }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}
+
+<!-- created by artur -->

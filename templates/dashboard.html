@@ -1,0 +1,241 @@
+{% extends "main.html" %}
+{% block content %}
+    {% if g.user.is_staff %}
+        <h1>{{ t('admin_dashboard') }}</h1>
+        <div class="search-container">
+            <input type="text" id="usernameInput" placeholder="Выбрать пользователя" aria-label="Выбрать пользователя">
+            <button onclick="searchUser()" class="search-button">Выбрать пользователя</button>
+        </div>
+        <div id="searchResult" class="search-result"></div>
+        <div class="dashboard-content" style="display: flex; gap: 2rem;">
+            <div class="user-details-section">
+                <div id="userDetails" class="user-details" style="display: none;">
+                    <h2>{{ t('user_details') }}</h2>
+                    <table>
+                        <tr>
+                            <th>{{ t('username') }}</th>
+                            <td id="detailUsername"></td>
+                        </tr>
+                        <tr>
+                            <th>{{ t('status') }}</th>
+                            <td id="detailStatus"></td>
+                        </tr>
+                        <tr>
+                            <th>{{ t('passport_number') }}</th>
+                            <td id="detailPassport"></td>
+                        </tr>
+                        <tr>
+                            <th>{{ t('phone_number') }}</th>
+                            <td id="detailPhone"></td>
+                        </tr>
+                        <tr>
+                            <th>{{ t('email') }}</th>
+                            <td id="detailEmail"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="test-users-actions">
+                    <button onclick="createTestUsers()" class="create-btn">{{ t('create_test_users') }}</button>
+                    <button onclick="deleteTestUsers()" class="create-btn" style="background-color: #dc3545;">{{ t('delete_test_users') }}</button>
+                </div>
+                <button id="showUsersBtn" class="create-btn" style="background-color: #007acc; margin-bottom: 1rem;">{{ t('show_users') }}</button>
+                <div id="usersList" style="display: none;">
+                    <h2>{{ t('all_users') }}</h2>
+                    <table id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>{{ t('username') }}</th>
+                                <th>{{ t('status') }}</th>
+                                <th>{{ t('passport_number') }}</th>
+                                <th>{{ t('phone_number') }}</th>
+                                <th>{{ t('email') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="editUserSection" class="edit-user-section" style="display: none; flex: 1;">
+                <h2>Edit User</h2>
+                <div id="editUserForm"></div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const showUsersBtn = document.getElementById('showUsersBtn');
+                const usersList = document.getElementById('usersList');
+                let shown = false;
+                showUsersBtn.addEventListener('click', function() {
+                    shown = !shown;
+                    usersList.style.display = shown ? 'block' : 'none';
+                    showUsersBtn.textContent = shown ? '{{ t('hide_users') }}' : '{{ t('show_users') }}';
+                    if (shown) {
+                        loadUsers();
+                    }
+                });
+            });
+
+            function searchUser() {
+                const username = document.getElementById('usernameInput').value.trim();
+                if (!username) {
+                    document.getElementById('searchResult').innerHTML = 'Введите имя пользователя';
+                    return;
+                }
+                fetch(`/check_user/${username}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const searchResult = document.getElementById('searchResult');
+                        const userDetails = document.getElementById('userDetails');
+                        const editUserSection = document.getElementById('editUserSection');
+                        const editUserForm = document.getElementById('editUserForm');
+                        if (data.found) {
+                            searchResult.innerHTML = data.message;
+                            userDetails.style.display = 'block';
+                            document.getElementById('detailUsername').textContent = data.user.username;
+                            document.getElementById('detailStatus').textContent = data.user.is_staff ? 'Admin' : 'User';
+                            document.getElementById('detailPassport').textContent = data.user.passport || '';
+                            document.getElementById('detailPhone').textContent = data.user.phone || '';
+                            document.getElementById('detailEmail').textContent = data.user.email || '';
+
+                            // Запрашиваем форму редактирования
+                            fetch(`/admin/edit_user/${username}`)
+                                .then(response => response.text())
+                                .then(html => {
+                                    editUserForm.innerHTML = html;
+                                    editUserSection.style.display = 'block';
+                                })
+                                .catch(error => {
+                                    editUserForm.innerHTML = 'Ошибка загрузки формы редактирования';
+                                    console.error('Error:', error);
+                                });
+                        } else {
+                            searchResult.innerHTML = data.message;
+                            userDetails.style.display = 'none';
+                            editUserSection.style.display = 'none';
+                            editUserForm.innerHTML = '';
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('searchResult').innerHTML = 'Ошибка при поиске пользователя';
+                        console.error('Error:', error);
+                    });
+            }
+
+            function createTestUsers() {
+                fetch('/create_test_users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error || 'Ошибка!');
+                    loadUsers();
+                })
+                .catch(error => {
+                    alert('Ошибка при создании тестовых пользователей');
+                });
+            }
+
+            function deleteTestUsers() {
+                fetch('/delete_test_users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error || 'Ошибка!');
+                    loadUsers();
+                })
+                .catch(error => {
+                    alert('Ошибка при удалении тестовых пользователей');
+                });
+            }
+
+            function loadUsers() {
+                fetch('/get_all_users')
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.getElementById('usersTableBody');
+                        tbody.innerHTML = '';
+                        if (data.users) {
+                            data.users.forEach(user => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>${user.username}</td>
+                                    <td>${user.is_staff ? 'Admin' : 'User'}</td>
+                                    <td>${user.passport || ''}</td>
+                                    <td>${user.phone || ''}</td>
+                                    <td>${user.email || ''}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        }
+                    });
+            }
+        </script>
+    {% else %}
+        <h1>{{ t('welcome_user') }} {{ g.user['username'] }}</h1>
+        <div class="personal-info">
+            <h2>{{ t('personal_account') }}</h2>
+            <div class="info-item">
+                <span class="info-icon">👤</span>
+                <span class="info-label">{{ t('full_name') }}:</span>
+                <span class="info-value">Азизов Азиз Азизович</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">📄</span>
+                <span class="info-label">{{ t('account_number') }}:</span>
+                <span class="info-value">123456789</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">📍</span>
+                <span class="info-label">{{ t('address') }}:</span>
+                <span class="info-value">г. Ташкент, ул. Примерная, д. 12, кв. 45</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">📞</span>
+                <span class="info-label">{{ t('phone_number') }}:</span>
+                <span class="info-value">+998 90 123-45-67</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">📧</span>
+                <span class="info-label">{{ t('email') }}:</span>
+                <span class="info-value">aziz.test@example.com</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">🆔</span>
+                <span class="info-label">{{ t('passport_number') }}:</span>
+                <span class="info-value">AA1234567</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">🏡</span>
+                <span class="info-label">{{ t('housing_type') }}:</span>
+                <span class="info-value">Квартира</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">📅</span>
+                <span class="info-label">{{ t('registered') }}:</span>
+                <span class="info-value">12.02.2023</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">🔐</span>
+                <span class="info-label">{{ t('last_login') }}:</span>
+                <span class="info-value">14.05.2025 18:42</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">🔔</span>
+                <span class="info-label">{{ t('notifications') }}:</span>
+                <span class="info-value">Email ✅, SMS ❌</span>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+<!-- created by artur -->

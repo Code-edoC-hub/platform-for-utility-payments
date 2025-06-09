@@ -1,0 +1,58 @@
+{% extends "main.html" %}
+{% block content %}
+    <h1>{{ t('headword') }}</h1>
+    <p>{{ t('description') }}</p>
+    <section class="news-section" aria-label="News">
+        <article class="news-item" tabindex="0" role="button" aria-expanded="false" aria-controls="news1-content" id="news1">
+            <h2 class="news-title">{{ t('news_title_1') }}</h2>
+            <div class="news-content" id="news1-content" aria-hidden="true">
+                <p>{{ t('news_content_1') }}</p>
+            </div>
+        </article>
+        <article class="news-item" tabindex="0" role="button" aria-expanded="false" aria-controls="news2-content" id="news2">
+            <h2 class="news-title">{{ t('news_title_2') }}</h2>
+            <div class="news-content" id="news2-content" aria-hidden="true">
+                <p>{{ t('news_content_2') }}</p>
+            </div>
+        </article>
+        <article class="news-item" tabindex="0" role="button" aria-expanded="false" aria-controls="news3-content" id="news3">
+            <h2 class="news-title">{{ t('news_title_3') }}</h2>
+            <div class="news-content" id="news3-content" aria-hidden="true">
+                <p>{{ t('news_content_3') }}</p>
+            </div>
+        </article>
+        <article class="news-item" tabindex="0" role="button" aria-expanded="false" aria-controls="news4-content" id="news4">
+            <h2 class="news-title">{{ t('news_title_4') }}</h2>
+            <div class="news-content" id="news4-content" aria-hidden="true">
+                <p>{{ t('news_content_4') }}</p>
+            </div>
+        </article>
+    </section>
+    <script>
+        const newsItems = document.querySelectorAll('.news-item');
+        newsItems.forEach(item => {
+            function toggle() {
+                const isActive = item.classList.contains('active');
+                newsItems.forEach(i => {
+                    i.classList.remove('active');
+                    i.setAttribute('aria-expanded', 'false');
+                    i.querySelector('.news-content').setAttribute('aria-hidden', 'true');
+                });
+                if (!isActive) {
+                    item.classList.add('active');
+                    item.setAttribute('aria-expanded', 'true');
+                    item.querySelector('.news-content').setAttribute('aria-hidden', 'false');
+                }
+            }
+            item.addEventListener('click', toggle);
+            item.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+<!-- created by artur -->

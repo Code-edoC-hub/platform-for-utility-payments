@@ -1,0 +1,71 @@
+<form id="editUserFormInner" onsubmit="submitEditUser(event, '{{ user['username'] }}')">
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    <div class="form-group">
+        <label for="full_name">{{ t('full_name') }}</label>
+        <input type="text" id="full_name" name="full_name" value="{{ user['full_name'] or '' }}">
+    </div>
+    <div class="form-group">
+        <label for="address">{{ t('address') }}</label>
+        <input type="text" id="address" name="address" value="{{ user['address'] or '' }}">
+    </div>
+    <div class="form-group">
+        <label for="account_number">{{ t('account_number') }}</label>
+        <input type="text" id="account_number" name="account_number" value="{{ user['account_number'] or '' }}">
+    </div>
+    <div class="form-group">
+        <label for="passport">{{ t('passport_number') }}</label>
+        <input type="text" id="passport" name="passport" value="{{ user['passport'] or '' }}" pattern="^[A-Z]{2}\d{7}$" title="{{ t('passport_requirements') }}">
+    </div>
+    <div class="form-group">
+        <label for="phone">{{ t('phone_number') }}</label>
+        <input type="tel" id="phone" name="phone" value="{{ user['phone'] or '' }}" pattern="^\+998\d{9}$" title="{{ t('phone_requirements') }}">
+    </div>
+    <div class="form-group">
+        <label for="email">{{ t('email') }}</label>
+        <input type="email" id="email" name="email" value="{{ user['email'] or '' }}">
+    </div>
+    <button type="submit" class="submit-btn">{{ t('save_changes') }}</button>
+</form>
+
+<script>
+function submitEditUser(event, username) {
+    event.preventDefault();
+    const form = document.getElementById('editUserFormInner');
+    const formData = {
+        full_name: form.querySelector('#full_name').value,
+        address: form.querySelector('#address').value,
+        account_number: form.querySelector('#account_number').value,
+        passport: form.querySelector('#passport').value,
+        phone: form.querySelector('#phone').value,
+        email: form.querySelector('#email').value
+    };
+
+    fetch(`/edit_user/${username}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error || 'Ошибка!');
+        if (data.message) {
+            // Обновляем данные пользователя на странице
+            document.getElementById('searchResult').innerHTML = 'Данные пользователя обновлены';
+            document.getElementById('detailPassport').textContent = formData.passport || '';
+            document.getElementById('detailPhone').textContent = formData.phone || '';
+            document.getElementById('detailEmail').textContent = formData.email || '';
+        }
+    })
+    .catch(error => {
+        alert('Ошибка при сохранении изменений');
+        console.error('Error:', error);
+    });
+}
+</script>
+
+<!-- created by artur -->

@@ -1,0 +1,896 @@
+{% extends "main.html" %}
+{% block content %}
+    <div class="payments-container">
+        <h1>{{ t('payments') }}</h1>
+        
+        <section class="payment-history-section">
+            <h2>{{ t('payment_history') }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ t('amount') }}</th>
+                        <th>{{ t('date') }}</th>
+                        <th>{{ t('payment_for') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if payments %}
+                        {% for payment in payments %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ "%.2f" | format(payment['amount']) }}</td>
+                                <td>{{ payment['payment_date'] }}</td>
+                                <td>
+                                    {% if payment['utility_type'] == 'water' %}
+                                        Водоснабжение
+                                    {% elif payment['utility_type'] == 'electricity' %}
+                                        Электроэнергия
+                                    {% elif payment['utility_type'] == 'gas' %}
+                                        Газоснабжение
+                                    {% elif payment['utility_type'] == 'heating' %}
+                                        Отопление
+                                    {% elif payment['utility_type'] == 'waste' %}
+                                        Вывоз ТБО
+                                    {% else %}
+                                        {{ payment['utility_type'] }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">{{ t('no_payments') }}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </section>
+
+        <div class="utility-sections">
+            <!-- Water Supply Section -->
+            <section class="utility-section">
+                <h2>{{ t('water_supply') }}</h2>
+                {% if water_data %}
+                    <div class="receipt-info">
+                        <div class="receipt-header">
+                            <div class="company-logo">
+                                <img src="{{ url_for('static', filename='water-logo.png') }}" alt="" class="company-logo-img">
+                            </div>
+                            <div class="company-info">
+                                <p class="company-name">Уз "Водоканал"</p>
+                                <p class="receipt-title">Квитанция по оплате водоснабжения</p>
+                            </div>
+                        </div>
+                        
+                        <div class="receipt-details">
+                            <p class="period">Период: {{ t((water_data['month']|int)|string) }} {{ water_data['year'] }}</p>
+                            <p class="generation-date">Дата формирования: {% if water_data['generation_date'] %}{{ water_data['generation_date'][:10].split('-')[2] }}.{{ water_data['generation_date'][:10].split('-')[1] }}.{{ water_data['generation_date'][:10].split('-')[0] }}{% else %}Не указана{% endif %}</p>
+                            
+                            <div class="consumption-details">
+                                <h3>Информация по потреблению и расчёт</h3>
+                                <table class="consumption-table">
+                                    <tr>
+                                        <td>Предыдущие показания:</td>
+                                        <td>{{ "%.0f" | format(water_data['previous_reading'] or 0) }} м³</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Текущие показания:</td>
+                                        <td>{{ "%.0f" | format(water_data['current_reading'] or 0) }} м³</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Расход за месяц:</td>
+                                        <td>{{ "%.0f" | format(water_data['consumption'] or 0) }} м³</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тариф за 1 м³:</td>
+                                        <td>{{ "%.2f" | format(water_data['tariff'] or 0) }} сум</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td>Сумма к оплате:</td>
+                                        <td>{{ "%.2f" | format(water_data['amount'] or 0) }} сум</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            {% if water_data and water_data['adjustments'] %}
+                            <div class="adjustments">
+                                <h3>Перерасчёты</h3>
+                                {% if water_data['adjustments'] and 'previous_debt' in water_data['adjustments'] %}
+                                <p>Перенос долга с прошлого месяца: {{ "%.2f" | format(water_data['adjustments']['previous_debt']) }} сум</p>
+                                {% endif %}
+                                {% if water_data['adjustments'] and 'overpayment' in water_data['adjustments'] %}
+                                <p>Переплата: {{ "%.2f" | format(water_data['adjustments']['overpayment']) }} сум</p>
+                                {% endif %}
+                                {% if water_data['adjustments'] and 'penalty' in water_data['adjustments'] %}
+                                <p>Пени (штрафы): {{ "%.2f" | format(water_data['adjustments']['penalty']) }} сум</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <div class="payment-info">
+                                <h3>Способы оплаты:</h3>
+                                <ul>
+                                    <li>Click, Payme, Uzcard</li>
+                                    <li>Банковский перевод</li>
+                                </ul>
+                                
+                                <h3>Контакты:</h3>
+                                <p>Телефон: +998 71 200-00-00</p>
+                                <p>Email: support@vodokanal.uz</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-action">
+                        <form method="POST" action="{{ url_for('pay_water') }}">
+                            <button type="submit" class="pay-button">{{ t('pay') }}</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>{{ t('no_payments') }}</p>
+                {% endif %}
+            </section>
+
+            <!-- Electricity Section -->
+            <section class="utility-section">
+                <h2>{{ t('electricity') }}</h2>
+                {% if electricity_data %}
+                    <div class="receipt-info">
+                        <div class="receipt-header">
+                            <div class="company-logo">
+                                <img src="{{ url_for('static', filename='electricity-logo.png') }}" alt="" class="company-logo-img">
+                            </div>
+                            <div class="company-info">
+                                <p class="company-name">Уз "Энергосбыт"</p>
+                                <p class="receipt-title">Квитанция по оплате электроэнергии</p>
+                            </div>
+                        </div>
+                        
+                        <div class="receipt-details">
+                            <p class="period">Период: {{ t((electricity_data['month']|int)|string) }} {{ electricity_data['year'] }}</p>
+                            <p class="generation-date">Дата формирования: {% if electricity_data['generation_date'] %}{{ electricity_data['generation_date'][:10].split('-')[2] }}.{{ electricity_data['generation_date'][:10].split('-')[1] }}.{{ electricity_data['generation_date'][:10].split('-')[0] }}{% else %}Не указана{% endif %}</p>
+                            
+                            <div class="consumption-details">
+                                <h3>Информация по потреблению и расчёт</h3>
+                                <table class="consumption-table">
+                                    <tr>
+                                        <td>Предыдущие показания:</td>
+                                        <td>{{ "%.0f" | format(electricity_data['previous_reading'] or 0) }} кВт·ч</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Текущие показания:</td>
+                                        <td>{{ "%.0f" | format(electricity_data['current_reading'] or 0) }} кВт·ч</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Расход за месяц:</td>
+                                        <td>{{ "%.0f" | format(electricity_data['consumption'] or 0) }} кВт·ч</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тариф за 1 кВт·ч:</td>
+                                        <td>{{ "%.2f" | format(electricity_data['tariff'] or 0) }} сум</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td>Сумма к оплате:</td>
+                                        <td>{{ "%.2f" | format(electricity_data['amount'] or 0) }} сум</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            {% if electricity_data and electricity_data['adjustments'] %}
+                            <div class="adjustments">
+                                <h3>Перерасчёты</h3>
+                                {% if electricity_data['adjustments'] and 'previous_debt' in electricity_data['adjustments'] %}
+                                <p>Перенос долга с прошлого месяца: {{ "%.2f" | format(electricity_data['adjustments']['previous_debt']) }} сум</p>
+                                {% endif %}
+                                {% if electricity_data['adjustments'] and 'overpayment' in electricity_data['adjustments'] %}
+                                <p>Переплата: {{ "%.2f" | format(electricity_data['adjustments']['overpayment']) }} сум</p>
+                                {% endif %}
+                                {% if electricity_data['adjustments'] and 'penalty' in electricity_data['adjustments'] %}
+                                <p>Пени (штрафы): {{ "%.2f" | format(electricity_data['adjustments']['penalty']) }} сум</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <div class="payment-info">
+                                <h3>Способы оплаты:</h3>
+                                <ul>
+                                    <li>Click, Payme, Uzcard</li>
+                                    <li>Банковский перевод</li>
+                                </ul>
+                                
+                                <h3>Контакты:</h3>
+                                <p>Телефон: +998 71 200-00-00</p>
+                                <p>Email: support@energo.uz</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-action">
+                        <form method="POST" action="{{ url_for('pay_electricity') }}">
+                            <button type="submit" class="pay-button">{{ t('pay') }}</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>{{ t('no_payments') }}</p>
+                {% endif %}
+            </section>
+
+            <!-- Gas Supply Section -->
+            <section class="utility-section">
+                <h2>{{ t('gas_supply') }}</h2>
+                {% if gas_data %}
+                    <div class="receipt-info">
+                        <div class="receipt-header">
+                            <div class="company-logo">
+                                <img src="{{ url_for('static', filename='gas-logo.png') }}" alt="" class="company-logo-img">
+                            </div>
+                            <div class="company-info">
+                                <p class="company-name">Уз "Газпром"</p>
+                                <p class="receipt-title">Квитанция по оплате газоснабжения</p>
+                            </div>
+                        </div>
+                        
+                        <div class="receipt-details">
+                            <p class="period">Период: {{ t((gas_data['month']|int)|string) }} {{ gas_data['year'] }}</p>
+                            <p class="generation-date">Дата формирования: {% if gas_data['generation_date'] %}{{ gas_data['generation_date'][:10].split('-')[2] }}.{{ gas_data['generation_date'][:10].split('-')[1] }}.{{ gas_data['generation_date'][:10].split('-')[0] }}{% else %}Не указана{% endif %}</p>
+                            
+                            <div class="consumption-details">
+                                <h3>Информация по потреблению и расчёт</h3>
+                                <table class="consumption-table">
+                                    <tr>
+                                        <td>Предыдущие показания:</td>
+                                        <td>{{ "%.0f" | format(gas_data['previous_reading'] or 0) }} м³</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Текущие показания:</td>
+                                        <td>{{ "%.0f" | format(gas_data['current_reading'] or 0) }} м³</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Расход за месяц:</td>
+                                        <td>{{ "%.0f" | format(gas_data['consumption'] or 0) }} м³</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тариф за 1 м³:</td>
+                                        <td>{{ "%.2f" | format(gas_data['tariff'] or 0) }} сум</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td>Сумма к оплате:</td>
+                                        <td>{{ "%.2f" | format(gas_data['amount'] or 0) }} сум</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            {% if gas_data and gas_data['adjustments'] %}
+                            <div class="adjustments">
+                                <h3>Перерасчёты</h3>
+                                {% if gas_data['adjustments'] and 'previous_debt' in gas_data['adjustments'] %}
+                                <p>Перенос долга с прошлого месяца: {{ "%.2f" | format(gas_data['adjustments']['previous_debt']) }} сум</p>
+                                {% endif %}
+                                {% if gas_data['adjustments'] and 'overpayment' in gas_data['adjustments'] %}
+                                <p>Переплата: {{ "%.2f" | format(gas_data['adjustments']['overpayment']) }} сум</p>
+                                {% endif %}
+                                {% if gas_data['adjustments'] and 'penalty' in gas_data['adjustments'] %}
+                                <p>Пени (штрафы): {{ "%.2f" | format(gas_data['adjustments']['penalty']) }} сум</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <div class="payment-info">
+                                <h3>Способы оплаты:</h3>
+                                <ul>
+                                    <li>Click, Payme, Uzcard</li>
+                                    <li>Банковский перевод</li>
+                                </ul>
+                                
+                                <h3>Контакты:</h3>
+                                <p>Телефон: +998 71 200-00-00</p>
+                                <p>Email: support@gazprom.uz</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-action">
+                        <form method="POST" action="{{ url_for('pay_gas') }}">
+                            <button type="submit" class="pay-button">{{ t('pay') }}</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>{{ t('no_payments') }}</p>
+                {% endif %}
+            </section>
+
+            <!-- Heating Section -->
+            <section class="utility-section">
+                <h2>{{ t('heating') }}</h2>
+                {% if heating_data %}
+                    <div class="receipt-info">
+                        <div class="receipt-header">
+                            <div class="company-logo">
+                                <img src="{{ url_for('static', filename='heating-logo.png') }}" alt="" class="company-logo-img">
+                            </div>
+                            <div class="company-info">
+                                <p class="company-name">Уз "Теплосеть"</p>
+                                <p class="receipt-title">Квитанция по оплате отопления</p>
+                            </div>
+                        </div>
+                        
+                        <div class="receipt-details">
+                            <p class="period">Период: {{ t((heating_data['month']|int)|string) }} {{ heating_data['year'] }}</p>
+                            <p class="generation-date">Дата формирования: {% if heating_data['generation_date'] %}{{ heating_data['generation_date'][:10].split('-')[2] }}.{{ heating_data['generation_date'][:10].split('-')[1] }}.{{ heating_data['generation_date'][:10].split('-')[0] }}{% else %}Не указана{% endif %}</p>
+                            
+                            <div class="consumption-details">
+                                <h3>Информация по потреблению и расчёт</h3>
+                                <table class="consumption-table">
+                                    <tr>
+                                        <td>Предыдущие показания:</td>
+                                        <td>{{ "%.0f" | format(heating_data['previous_reading'] or 0) }} Гкал</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Текущие показания:</td>
+                                        <td>{{ "%.0f" | format(heating_data['current_reading'] or 0) }} Гкал</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Расход за месяц:</td>
+                                        <td>{{ "%.0f" | format(heating_data['consumption'] or 0) }} Гкал</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тариф за 1 Гкал:</td>
+                                        <td>{{ "%.2f" | format(heating_data['tariff'] or 0) }} сум</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td>Сумма к оплате:</td>
+                                        <td>{{ "%.2f" | format(heating_data['amount'] or 0) }} сум</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            {% if heating_data and heating_data['adjustments'] %}
+                            <div class="adjustments">
+                                <h3>Перерасчёты</h3>
+                                {% if heating_data['adjustments'] and 'previous_debt' in heating_data['adjustments'] %}
+                                <p>Перенос долга с прошлого месяца: {{ "%.2f" | format(heating_data['adjustments']['previous_debt']) }} сум</p>
+                                {% endif %}
+                                {% if heating_data['adjustments'] and 'overpayment' in heating_data['adjustments'] %}
+                                <p>Переплата: {{ "%.2f" | format(heating_data['adjustments']['overpayment']) }} сум</p>
+                                {% endif %}
+                                {% if heating_data['adjustments'] and 'penalty' in heating_data['adjustments'] %}
+                                <p>Пени (штрафы): {{ "%.2f" | format(heating_data['adjustments']['penalty']) }} сум</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <div class="payment-info">
+                                <h3>Способы оплаты:</h3>
+                                <ul>
+                                    <li>Click, Payme, Uzcard</li>
+                                    <li>Банковский перевод</li>
+                                </ul>
+                                
+                                <h3>Контакты:</h3>
+                                <p>Телефон: +998 71 200-00-00</p>
+                                <p>Email: support@teplo.uz</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-action">
+                        <form method="POST" action="{{ url_for('pay_heating') }}">
+                            <button type="submit" class="pay-button">{{ t('pay') }}</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>{{ t('no_payments') }}</p>
+                {% endif %}
+            </section>
+
+            <!-- Waste Disposal Section -->
+            <section class="utility-section">
+                <h2>{{ t('waste_disposal') }}</h2>
+                {% if waste_data %}
+                    <div class="receipt-info">
+                        <div class="receipt-header">
+                            <div class="company-logo">
+                                <img src="{{ url_for('static', filename='waste-logo.png') }}" alt="" class="company-logo-img">
+                            </div>
+                            <div class="company-info">
+                                <p class="company-name">Уз "ЭкоСервис"</p>
+                                <p class="receipt-title">Квитанция по оплате вывоза ТБО</p>
+                            </div>
+                        </div>
+                        
+                        <div class="receipt-details">
+                            <p class="period">Период: {{ waste_data['payment_date'] }}</p>
+                            
+                            <div class="consumption-details">
+                                <h3>Информация по оплате</h3>
+                                <table class="consumption-table">
+                                    <tr class="total-row">
+                                        <td>Сумма к оплате:</td>
+                                        <td>{{ "%.2f" | format(waste_data['amount'] or 0) }} сум</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="payment-info">
+                                <h3>Способы оплаты:</h3>
+                                <ul>
+                                    <li>Click, Payme, Uzcard</li>
+                                    <li>Банковский перевод</li>
+                                </ul>
+                                
+                                <h3>Контакты:</h3>
+                                <p>Телефон: +998 71 200-00-00</p>
+                                <p>Email: support@ecoservice.uz</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-action">
+                        <form method="POST" action="{{ url_for('pay_waste') }}">
+                            <button type="submit" class="pay-button">{{ t('pay') }}</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>{{ t('no_payments') }}</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="bottom-button-container">
+            <form method="POST" action="{{ url_for('generate_receipts') }}">
+                <button type="submit" class="white-button">{{ t('generate_receipts') }}</button>
+            </form>
+        </div>
+
+        <!-- Payment Modal -->
+        <div id="paymentModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Введите данные карты</h2>
+                <form id="cardForm" onsubmit="return validateCard(event)">
+                    <div class="form-group">
+                        <label for="cardNumber">Номер карты:</label>
+                        <input type="text" id="cardNumber" maxlength="16" placeholder="XXXX XXXX XXXX XXXX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardDate">Срок действия:</label>
+                        <input type="text" id="cardDate" maxlength="5" placeholder="MM/YY" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV код:</label>
+                        <input type="text" id="cvv" maxlength="3" placeholder="XXX" required>
+                    </div>
+                    <button type="submit" class="pay-button">Оплатить</button>
+                </form>
+            </div>
+        </div>
+
+        <style>
+            .payments-container {
+                max-width: 1200px;
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            .utility-sections {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+
+            .utility-section {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                width: 100%;
+            }
+
+            .utility-section h2 {
+                color: #333;
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid #f0f0f0;
+            }
+
+            .payment-history-section table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 1rem;
+                color: #000000;
+            }
+
+            .payment-history-section th,
+            .payment-history-section td {
+                padding: 0.75rem;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+                color: #000000;
+            }
+
+            .payment-history-section th {
+                background-color: #f8f9fa;
+                font-weight: 600;
+                color: #000000;
+            }
+
+            .pay-button {
+                background-color: #28a745;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: background-color 0.3s ease;
+            }
+
+            .pay-button:hover {
+                background-color: #218838;
+            }
+
+            @media (max-width: 768px) {
+                .utility-sections {
+                    gap: 1rem;
+                }
+            }
+
+            .bottom-button-container {
+                text-align: center;
+                margin-top: 2rem;
+                padding: 1rem;
+            }
+
+            .white-button {
+                background-color: white;
+                color: white;
+                border: 1px solid #ccc;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+            }
+
+            .white-button:hover {
+                background-color: #e0e0e0;
+                color: #e0e0e0;
+            }
+
+            .receipt-info {
+                margin-bottom: 1rem;
+                padding: 1.5rem;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .receipt-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .company-logo {
+                margin-right: 1rem;
+            }
+            
+            .company-logo-img {
+                width: 60px;
+                height: 60px;
+                object-fit: contain;
+            }
+            
+            .company-info {
+                flex-grow: 1;
+            }
+            
+            .company-name {
+                font-size: 1.25rem;
+                font-weight: bold;
+                margin-bottom: 0.25rem;
+                color: #333;
+            }
+            
+            .receipt-title {
+                font-size: 1.1rem;
+                color: #666;
+            }
+            
+            .receipt-details {
+                margin-top: 1rem;
+            }
+            
+            .period, .generation-date {
+                color: #666;
+                margin-bottom: 0.5rem;
+            }
+            
+            .consumption-details {
+                margin: 1.5rem 0;
+            }
+            
+            .consumption-details h3 {
+                color: #333;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            
+            .consumption-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            .consumption-table td {
+                padding: 0.5rem;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .consumption-table td:first-child {
+                color: #666;
+                width: 50%;
+            }
+            
+            .total-row {
+                font-weight: bold;
+                background-color: #f8f9fa;
+            }
+            
+            .adjustments {
+                margin: 1.5rem 0;
+                padding: 1rem;
+                background-color: #fff;
+                border-radius: 4px;
+                border: 1px solid #dee2e6;
+            }
+            
+            .adjustments h3 {
+                color: #333;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+            
+            .payment-info {
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid #dee2e6;
+            }
+            
+            .payment-info h3 {
+                color: #333;
+                margin: 1rem 0 0.5rem;
+                font-size: 1.1rem;
+            }
+            
+            .payment-info ul {
+                list-style: none;
+                padding-left: 0;
+                margin: 0.5rem 0;
+            }
+            
+            .payment-info li {
+                margin-bottom: 0.25rem;
+                color: #666;
+            }
+            
+            .payment-action {
+                margin-top: 1rem;
+                text-align: right;
+            }
+
+            /* Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 15% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 500px;
+                border-radius: 8px;
+                position: relative;
+            }
+
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover {
+                color: black;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: #333;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 1rem;
+            }
+
+            .form-group input:focus {
+                outline: none;
+                border-color: #4CAF50;
+            }
+
+            .receipt {
+                background: white;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .receipt h3 {
+                text-align: center;
+                margin-bottom: 20px;
+                color: #333;
+                font-size: 1.2em;
+            }
+            .receipt-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .receipt-content p {
+                margin: 5px 0;
+                color: #666;
+            }
+            .receipt-content strong {
+                color: #333;
+            }
+            .pay-button {
+                background: #4CAF50;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-top: 10px;
+                width: 100%;
+            }
+            .pay-button:hover {
+                background: #45a049;
+            }
+            .payment-history {
+                margin-top: 30px;
+            }
+            .payment-history h3 {
+                text-align: center;
+                margin-bottom: 20px;
+                color: #333;
+            }
+            .payment-history table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+            .payment-history th, .payment-history td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+                color: #000000;
+            }
+            .payment-history th {
+                background-color: #f8f9fa;
+                font-weight: bold;
+            }
+            .payment-history tr:hover {
+                background-color: #f5f5f5;
+            }
+            .no-bills {
+                text-align: center;
+                color: #666;
+                padding: 20px;
+            }
+            .receipt-header {
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #eee;
+            }
+            .receipt-header h3 {
+                margin: 0;
+                color: #333;
+                font-size: 1.4em;
+            }
+            .receipt-header p {
+                margin: 5px 0;
+                color: #666;
+            }
+        </style>
+
+        <script>
+            // Get modal elements
+            const modal = document.getElementById('paymentModal');
+            const closeBtn = document.getElementsByClassName('close')[0];
+            const payButtons = document.querySelectorAll('.pay-button');
+
+            // Add click event to all pay buttons
+            payButtons.forEach(button => {
+                if (!button.closest('#cardForm')) {  // Exclude the button in the modal
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        modal.style.display = 'block';
+                    });
+                }
+            });
+
+            // Close modal when clicking the X
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+            // Format card number input
+            document.getElementById('cardNumber').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+            });
+
+            // Format card date input
+            document.getElementById('cardDate').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.slice(0,2) + '/' + value.slice(2);
+                }
+                e.target.value = value;
+            });
+
+            // Format CVV input
+            document.getElementById('cvv').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+            });
+
+            // Validate card form
+            function validateCard(event) {
+                event.preventDefault();
+                
+                const cardNumber = document.getElementById('cardNumber').value;
+                const cardDate = document.getElementById('cardDate').value;
+                const cvv = document.getElementById('cvv').value;
+
+                // Check if all fields contain only digits
+                if (/^\d+$/.test(cardNumber) && /^\d{2}\/\d{2}$/.test(cardDate) && /^\d+$/.test(cvv)) {
+                    alert('Платеж в обработке');
+                    modal.style.display = 'none';
+                    return true;
+                } else {
+                    alert('Неверно введены данные карты');
+                    return false;
+                }
+            }
+        </script>
+    </div>
+{% endblock %}
+
+<!-- created by artur --> 

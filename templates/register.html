@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('title') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='class.css') }}">
+    <style>
+        body {
+            background-image: url("/static/1.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .register-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .register-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #333;
+            position: relative;
+        }
+        .close-register-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background-color 0.3s ease;
+            border-radius: 50%;
+        }
+        .close-register-btn:hover {
+            background-color: rgb(230, 214, 172);
+        }
+        .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-group input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input.error {
+            border-color: #ff4444;
+            background-color: #fff8f8;
+        }
+        .form-group .error-message {
+            color: #ff4444;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .form-group input.error + .error-message {
+            display: block;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            margin-bottom: 1rem;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .alt-login-btn {
+            background-color: #2196F3;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .alt-login-btn:hover {
+            background-color: #1976D2;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            padding-top: 3rem;
+        }
+        .close-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background-color 0.3s ease;
+            border-radius: 50%;
+        }
+        .close-button:hover {
+            background-color: rgb(230, 214, 172);
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .auth-button {
+            width: 100px;
+            height: 100px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.2s;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(33, 150, 243, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .auth-button:hover {
+            transform: scale(1.1);
+        }
+        .auth-button:hover::before {
+            opacity: 1;
+        }
+        .auth-button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .auth-button-label {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .myid-button {
+            background-image: url('/static/myid.webp');
+        }
+        .oneid-button {
+            background-image: url('/static/oneid.png');
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1 class="register-title">
+            {{ t('registration') }}
+            <a href="{{ url_for('index') }}" class="close-register-btn">&times;</a>
+        </h1>
+        <form method="POST" class="register-form" id="registerForm" onsubmit="return validateForm()">
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="username">{{ t('username') }}</label>
+                <input type="text" id="username" name="username" required 
+                       pattern="^[a-zA-Z0-9_]{3,20}$"
+                       title="{{ t('username_requirements') }}">
+                <span class="error-message">{{ t('username_error') }}</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">{{ t('password') }}</label>
+                <input type="password" id="password" name="password" required
+                       pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                       title="{{ t('password_requirements') }}">
+                <span class="error-message">{{ t('password_error') }}</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">{{ t('confirm_password') }}</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+                <span class="error-message">{{ t('password_mismatch') }}</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="passport">{{ t('passport') }}</label>
+                <input type="text" id="passport" name="passport" required
+                       pattern="^[A-Z]{2}\d{7}$"
+                       title="{{ t('passport_requirements') }}">
+                <span class="error-message">{{ t('passport_error') }}</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">{{ t('phone') }}</label>
+                <input type="tel" id="phone" name="phone" required
+                       pattern="^\+998\d{9}$"
+                       title="{{ t('phone_requirements') }}">
+                <span class="error-message">{{ t('phone_error') }}</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">{{ t('email') }}</label>
+                <input type="email" id="email" name="email" required>
+                <span class="error-message">{{ t('email_error') }}</span>
+            </div>
+            
+            <button type="submit" class="submit-btn">{{ t('register') }}</button>
+        </form>
+        
+        <button type="button" class="alt-login-btn" onclick="showAuthModal()">
+            {{ t('login_another_way') }}
+        </button>
+    </div>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeAuthModal()">&times;</button>
+            <h2>{{ t('choose_auth_method') }}</h2>
+            <div class="auth-buttons">
+                <div class="auth-button-container">
+                    <button class="auth-button myid-button" onclick="showServiceMessage('MyID')"></button>
+                    <span class="auth-button-label">MyID</span>
+                </div>
+                <div class="auth-button-container">
+                    <button class="auth-button oneid-button" onclick="showServiceMessage('OneID')"></button>
+                    <span class="auth-button-label">OneID</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAuthModal() {
+            document.getElementById('authModal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        function showServiceMessage(service) {
+            alert('{{ t("service_not_connected") }}');
+        }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('authModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const form = document.getElementById('registerForm');
+            const inputs = form.querySelectorAll('input[required]');
+            
+            // Сбросить предыдущие ошибки
+            inputs.forEach(input => {
+                input.classList.remove('error');
+                const errorMessage = input.nextElementSibling;
+                if (errorMessage && errorMessage.classList.contains('error-message')) {
+                    errorMessage.style.display = 'none';
+                }
+            });
+            
+            // Проверка паролей на совпадение
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.classList.add('error');
+                const errorMessage = confirmPassword.nextElementSibling;
+                if (errorMessage) {
+                    errorMessage.style.display = 'block';
+                }
+                isValid = false;
+            }
+            
+            // Проверка каждого поля
+            inputs.forEach(input => {
+                if (!input.checkValidity()) {
+                    input.classList.add('error');
+                    const errorMessage = input.nextElementSibling;
+                    if (errorMessage && errorMessage.classList.contains('error-message')) {
+                        errorMessage.style.display = 'block';
+                    }
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                // Показать общее сообщение об ошибке
+                const errorDiv = form.querySelector('.error') || document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = '{{ t("please_correct_errors") }}';
+                if (!form.querySelector('.error')) {
+                    form.insertBefore(errorDiv, form.firstChild);
+                }
+            }
+            
+            return isValid;
+        }
+        
+        // Валидация при вводе
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('error');
+                    const errorMessage = this.nextElementSibling;
+                    if (errorMessage && errorMessage.classList.contains('error-message')) {
+                        errorMessage.style.display = 'none';
+                    }
+                }
+            });
+        });
+        
+        // Специальная валидация для подтверждения пароля
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password');
+            if (this.value !== password.value) {
+                this.classList.add('error');
+                const errorMessage = this.nextElementSibling;
+                if (errorMessage) {
+                    errorMessage.style.display = 'block';
+                }
+            } else {
+                this.classList.remove('error');
+                const errorMessage = this.nextElementSibling;
+                if (errorMessage) {
+                    errorMessage.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
+<!-- created by artur -->

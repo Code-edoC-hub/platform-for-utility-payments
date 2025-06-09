@@ -1,0 +1,443 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    margin: 0;
+    background: #f3f4f6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background: #0066cc;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+}
+
+.header-title {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.nav-center {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+header nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+header nav a:hover {
+    background-color: #005bb5;
+    text-decoration: none;
+}
+
+main {
+    flex: 1;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: ghostwhite;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.lang-form {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+select.lang-select {
+    border: none;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #005bb5;
+    color: white;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+select.lang-select option {
+    color: black;
+    font-size: 1rem;
+}
+
+.news-section {
+    margin-top: 2rem;
+}
+
+.news-item {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.news-item:hover {
+    background-color: #e6f0ff;
+}
+
+.news-title {
+    font-weight: 700;
+    margin: 0;
+}
+
+.news-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    padding: 0;
+}
+
+.news-item.active .news-content {
+    padding: 0.5rem 0 0 0;
+    max-height: 500px;
+}
+
+.container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+h1 {
+    margin-top: 0;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+input {
+    margin-top: 0.2rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+button {
+    margin-top: 1.5rem;
+    padding: 0.7rem;
+    font-size: 1rem;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+button:hover {
+    background: #005bb5;
+}
+
+.error {
+    margin-top: 1rem;
+    color: red;
+    text-align: center;
+    font-weight: 600;
+}
+
+a {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007acc;
+    color: white;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.pay-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.pay-button:hover {
+    background-color: #218838;
+}
+
+.message {
+    margin-top: 1rem;
+    padding: 10px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.select-form {
+    margin-bottom: 1rem;
+}
+
+.select-form select {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 1rem;
+}
+
+.select-form button {
+    padding: 0.5rem 1rem;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.select-form button:hover {
+    background: #005bb5;
+}
+
+@media (max-width: 720px) {
+    main {
+        margin: 1rem;
+        padding: 0;
+    }
+    header {
+        padding: 0.5rem;
+    }
+    .nav-center {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .lang-form {
+        position: static;
+        margin: 1rem auto 0;
+    }
+    .dashboard-content {
+        flex-direction: column !important;
+    }
+}
+
+@media (max-width: 600px) {
+    main {
+        margin: 1rem;
+        padding: 0;
+    }
+}
+
+@media (max-width: 450px) {
+    body {
+        padding: 1rem;
+        height: auto;
+    }
+    .container {
+        box-shadow: none;
+    }
+    .header-title {
+        font-size: 1.5rem;
+    }
+}
+
+.staff-login {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.staff-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: #0066cc;
+}
+
+.staff-toggle input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+}
+
+#staffKeyField {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+}
+
+/* Styles for dashboard */
+.dashboard-content {
+    display: flex;
+    gap: 2rem;
+}
+
+.user-details-section {
+    flex: 1;
+}
+
+.edit-user-section {
+    flex: 1;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-user-section h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.submit-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.7rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 700;
+    width: 100%;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+}
+
+/* New styles for personal info */
+.personal-info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.personal-info h2 {
+    margin-top: 0;
+    color: #333;
+    text-align: center;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 2rem;
+    text-align: center;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #555;
+    width: 150px;
+}
+
+.info-value {
+    flex: 1;
+    color: #333;
+}
+
+@media (max-width: 600px) {
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .info-label {
+        width: auto;
+    }
+    .info-icon {
+        margin-right: 0;
+    }
+}
